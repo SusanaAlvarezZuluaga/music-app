@@ -1,24 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+import fetchJsonp from 'fetch-jsonp';
 
-import axios from "axios";
-import SongResult from "../SongResult";
+import axios from 'axios';
+import SongResult from '../SongResult';
 
-import "./style.css";
+import './style.css';
 
 function SongResultList({ nameTyped }) {
   const [songResults, setSongResults] = useState([]);
   const [hidden, setHidden] = useState(true);
 
   function fetchApi() {
-    if (nameTyped === "") {
+    if (nameTyped === '') {
       setSongResults([]);
       setHidden(true);
     } else {
-      const apiUrl = `https://api.deezer.com/search/track/autocomplete?limit=15&q=${nameTyped}`;
-      axios.get(apiUrl).then((response) => {
-        setSongResults(response.data.data);
-        setHidden(false);
-      });
+      const apiUrl = `https://api.deezer.com/search/track/autocomplete?limit=15&q=${nameTyped}&output=jsonp`;
+
+      fetchJsonp(apiUrl)
+        .then((response) => {
+          return response.json();
+        })
+        .then((response) => {
+          setSongResults(response.data);
+          setHidden(false);
+        })
+        .catch((err) => console.log(err));
     }
   }
 
@@ -26,7 +33,7 @@ function SongResultList({ nameTyped }) {
   useEffect(() => fetchApi(), [nameTyped]);
 
   return (
-    <div className={hidden ? "hide" : "song-holder"}>
+    <div className={hidden ? 'hide' : 'song-holder'}>
       {songResults.map((song) => (
         <SongResult
           key={song.id}

@@ -1,24 +1,29 @@
-import SongCardHeader from "../SongCardHeader";
-import Album from "../Album";
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import axios from "axios";
-import SongCardLyrics from "../SongCardLyrics";
-import "./style.css";
+import SongCardHeader from '../SongCardHeader';
+import Album from '../Album';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import SongCardLyrics from '../SongCardLyrics';
+import fetchJsonp from 'fetch-jsonp';
+import './style.css';
 function SongCard() {
   let songId = useParams().id;
   const [showLyr, setShowLyr] = useState(false);
   let [loading, setLoading] = useState(true);
   let [songInfo, setSongInfo] = useState([]);
+
   function getAllSongInfo() {
     setLoading(true);
-    axios
-      .get(`https://api.deezer.com/track/${songId}`)
+    fetchJsonp(`https://api.deezer.com/track/${songId}&output=jsonp`)
       .then((resp) => {
-        setSongInfo(resp.data);
+        return resp.json();
+      })
+      .then((resp) => {
+        setSongInfo(resp);
         setLoading(false);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        console.log(err);
+      });
   }
   useEffect(() => {
     getAllSongInfo();
@@ -28,7 +33,7 @@ function SongCard() {
     return <div>Loading...</div>;
   } else {
     return (
-      <div className='song-card'>
+      <div className="song-card">
         <SongCardHeader
           image={songInfo.album.cover_big}
           artist={songInfo.contributors[0].name}
